@@ -6,19 +6,16 @@
 	"description": "Surveillance AI horror - an adaptive stalker that watches, learns, corrupts your world, and sometimes shows its creepy glitched face. Singleplayer psychological horror with full config and counter items.",
 	"authors": ["AiHorror Team"],
 	"contact": {
-		"homepage": "https://github.com/aihorror/aihorror",
-		"sources": "https://github.com/aihorror/aihorror"
+		"homepage": "https://github.com/NFRSTH/aihorror",
+		"sources": "https://github.com/NFRSTH/aihorror"
 	},
 	"license": "MIT",
 	"icon": "assets/aihorror/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"main": [
-			"com.aihorror.AiHorror"
-		],
-		"client": [
-			"com.aihorror.client.AiHorrorClient"
-		]
+		"main": ["com.aihorror.AiHorror"],
+		"client": ["com.aihorror.client.AiHorrorClient"],
+		"modmenu": ["com.aihorror.client.ModMenuIntegration"]
 	},
 	"mixins": ["aihorror.mixins.json", {"config": "aihorror.client.mixins.json", "environment": "client"}],
 	"depends": {
@@ -31,5 +28,3 @@
 		"modmenu:api": true
 	}
 }
-
-

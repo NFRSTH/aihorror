@@ -5,7 +5,7 @@
 [![Fabric 26.2](https://img.shields.io/badge/Minecraft-26.2-green)](https://fabricmc.net) [![Loader 0.19.3](https://img.shields.io/badge/Loader-0.19.3-blue)](https://fabricmc.net) [![Java 25](https://img.shields.io/badge/Java-25-orange)](https://adoptium.net) [![License MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 **Mod jar:** `mods/aihorror-1.0.0.jar` (159KB, contains 3 user textures, valid Ogg Vorbis, working refmaps, fixed icon)  
-**Project:** `C:\Users\HP\AiHorror` ÔÇö **GitHub:** https://github.com/NFRSTH/aihorror
+**Project: `C:\Users\HP\AiHorror` (clone via `git clone https://github.com/NFRSTH/aihorror.git C:\Users\HP\AiHorror` ÔÇö do NOT nest `Downloads\aihorror-master\aihorror-master`)
 
 ---
 
@@ -123,8 +123,8 @@ World `saves/creepy world` has `datapacks/aihorror/pack.mcmeta` marker + `AIHORR
 set JAVA_HOME=C:\Users\HP\jdk25\jdk-25.0.4.1+1
 cd C:\Users\HP\AiHorror
 .\gradlew.bat build
-# ÔåÆ build/libs/modid-1.0.0.jar (159KB) + modid-1.0.0-sources.jar
-copy build\libs\modid-1.0.0.jar "%appdata%\.tlauncher\legacy\Minecraft\game\mods\aihorror-1.0.0.jar"
+# ÔåÆ build/libs/aihorror-1.0.0.jar (159KB) + aihorror-1.0.0-sources.jar
+copy build\libs\aihorror-1.0.0.jar "%appdata%\.tlauncher\legacy\Minecraft\game\mods\aihorror-1.0.0.jar"
 ```
 
 Mixins refmaps are generated via `src/*/resources/*.refmap.json` (manual minimal, loom also generates).
@@ -149,3 +149,4 @@ Source published to **https://github.com/NFRSTH/aihorror** (`master`):
 - `0ffe56a` fix ogg/textures
 
 License MIT.
+
