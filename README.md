@@ -5,7 +5,7 @@
 [![Fabric 26.2](https://img.shields.io/badge/Minecraft-26.2-green)](https://fabricmc.net) [![Loader 0.19.3](https://img.shields.io/badge/Loader-0.19.3-blue)](https://fabricmc.net) [![Java 25](https://img.shields.io/badge/Java-25-orange)](https://adoptium.net) [![License MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 **Mod jar:** `mods/aihorror-1.0.0.jar` (159KB, contains 3 user textures, valid Ogg Vorbis, working refmaps, fixed icon)  
-**Project: `C:\Users\HP\AiHorror` (clone via `git clone https://github.com/NFRSTH/aihorror.git C:\Users\HP\AiHorror` ÔÇö do NOT nest `Downloads\aihorror-master\aihorror-master`)
+**Project: `.\AiHorror` (clone via `git clone https://github.com/NFRSTH/aihorror.git` ÔÇö do NOT nest)
 
 ---
 
@@ -109,8 +109,8 @@
 ## Installation
 
 1. Install **Fabric Loader 0.19.3** for **26.2** via TLauncher
-2. Put `fabric-api-0.158.0+26.2.jar` + `aihorror-1.0.0.jar` (159KB) in `C:\Users\HP\AppData\Roaming\.tlauncher\legacy\Minecraft\game\mods\`
-3. Requires **Java 25** (`jdk-25.0.4.1+1` at `C:\Users\HP\jdk25\`)
+2. Put `fabric-api-0.158.0+26.2.jar` + `aihorror-1.0.0.jar` (159KB) in `%APPDATA%\.tlauncher\legacy\Minecraft\game\mods\`
+3. Requires **Java 25** (`jdk-25.0.4.1+1` at `C:\jdk25\`)
 4. Launch `Fabric 26.2` ÔåÆ `creepy world` (already Creative + cheats: `level.dat GameType 1 allowCommands 1`, `players/data/... playerGameType 1`)
 
 World `saves/creepy world` has `datapacks/aihorror/pack.mcmeta` marker + `AIHORROR_ACTIVE.txt`
@@ -120,8 +120,8 @@ World `saves/creepy world` has `datapacks/aihorror/pack.mcmeta` marker + `AIHORR
 ## Building
 
 ```bat
-set JAVA_HOME=C:\Users\HP\jdk25\jdk-25.0.4.1+1
-cd C:\Users\HP\AiHorror
+set JAVA_HOME=C:\jdk25\jdk-25.0.4+1  (or your JDK 25 install)
+cd .\AiHorror
 .\gradlew.bat build
 # ÔåÆ build/libs/aihorror-1.0.0.jar (159KB) + aihorror-1.0.0-sources.jar
 copy build\libs\aihorror-1.0.0.jar "%appdata%\.tlauncher\legacy\Minecraft\game\mods\aihorror-1.0.0.jar"
@@ -149,4 +149,5 @@ Source published to **https://github.com/NFRSTH/aihorror** (`master`):
 - `0ffe56a` fix ogg/textures
 
 License MIT.
+
 
