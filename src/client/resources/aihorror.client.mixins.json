@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.aihorror.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "refmap": "aihorror.client.refmap.json",
+  "mixins": [
+    "CameraShakeMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

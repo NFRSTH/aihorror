@@ -1,0 +1,11 @@
+{
+  "item.aihorror.scanner": "AI Scanner",
+  "item.aihorror.emf_reader": "EMF Reader",
+  "item.aihorror.corrupted_tape": "Corrupted Tape",
+  "block.aihorror.corrupted_block": "Corrupted Block",
+  "entity.aihorror.glitch": "Glitch",
+  "sound.aihorror.jumpscare": "Jumpscare",
+  "sound.aihorror.whisper": "Whisper",
+  "subtitles.aihorror.jumpscare": "AI screams",
+  "subtitles.aihorror.whisper": "AI whispers"
+}

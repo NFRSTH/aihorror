@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.aihorror.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "refmap": "aihorror.refmap.json",
+  "mixins": [
+    "ServerLevelMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

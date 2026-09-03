@@ -1,0 +1,6 @@
+{
+  "jumpscare": { "sounds": [{ "name": "aihorror:jumpscare", "stream": false }], "subtitle": "subtitles.aihorror.jumpscare" },
+  "whisper": { "sounds": [{ "name": "aihorror:whisper", "stream": false }], "subtitle": "subtitles.aihorror.whisper" },
+  "glitch_ambient": { "sounds": [{ "name": "aihorror:glitch_ambient", "stream": true }] },
+  "static_loop": { "sounds": [{ "name": "aihorror:static_loop", "stream": true }] }
+}

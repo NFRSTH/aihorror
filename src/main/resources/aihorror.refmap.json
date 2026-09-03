@@ -1,0 +1,10 @@
+{
+  "mappings": {},
+  "data": {
+    "named:intermediary": {
+      "com/aihorror/mixin/ServerLevelMixin": {
+        "tick(Ljava/util/function/BooleanSupplier;Lorg/spongepowered/asm/mixin/injection/callback/CallbackInfo;)V": "tick"
+      }
+    }
+  }
+}

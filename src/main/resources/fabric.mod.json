@@ -1,0 +1,35 @@
+{
+	"schemaVersion": 1,
+	"id": "aihorror",
+	"version": "${version}",
+	"name": "AiHorror",
+	"description": "Surveillance AI horror - an adaptive stalker that watches, learns, corrupts your world, and sometimes shows its creepy glitched face. Singleplayer psychological horror with full config and counter items.",
+	"authors": ["AiHorror Team"],
+	"contact": {
+		"homepage": "https://github.com/aihorror/aihorror",
+		"sources": "https://github.com/aihorror/aihorror"
+	},
+	"license": "MIT",
+	"icon": "assets/aihorror/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.aihorror.AiHorror"
+		],
+		"client": [
+			"com.aihorror.client.AiHorrorClient"
+		]
+	},
+	"mixins": ["aihorror.mixins.json", {"config": "aihorror.client.mixins.json", "environment": "client"}],
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	},
+	"custom": {
+		"modmenu:api": true
+	}
+}
+
+
