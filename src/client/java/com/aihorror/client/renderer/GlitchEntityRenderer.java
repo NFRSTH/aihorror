@@ -12,16 +12,19 @@ import net.minecraft.resources.Identifier;
 public class GlitchEntityRenderer extends HumanoidMobRenderer<GlitchEntity, HumanoidRenderState, HumanoidModel<HumanoidRenderState>> {
     private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(AiHorror.MOD_ID, "textures/entity/glitch.png");
     private static final Identifier CREEPY = Identifier.fromNamespaceAndPath(AiHorror.MOD_ID, "textures/entity/glitch_creepy.png");
+    private static final Identifier ALT = Identifier.fromNamespaceAndPath(AiHorror.MOD_ID, "textures/entity/glitch_alt.png");
 
     public GlitchEntityRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)), 0.5f);
-        // reuse zombie model but creepy texture
     }
 
     @Override
     public Identifier getTextureLocation(HumanoidRenderState state) {
-        // flicker between textures for glitch effect
-        return (System.currentTimeMillis()/200 % 2 == 0) ? TEXTURE : CREEPY;
+        // Use all 3 user images from Downloads for glitch flicker - cycles every 150ms
+        long t = System.currentTimeMillis() / 150 % 3;
+        if (t == 0) return TEXTURE; // glitch-5167543797.png - your first download
+        if (t == 1) return CREEPY; // glitch_creepy-3778253060.png - your second
+        return ALT; // glitch_alt-3592543168.png - your third
     }
 
     @Override
