@@ -12,7 +12,7 @@
   "subtitles.aihorror.whisper": "AI whispers",
   "subtitles.aihorror.glitch_ambient": "AI hums ominously",
   "subtitles.aihorror.static_loop": "Static crackles",
-  "item.aihorror.scanner.tooltip": "Detects glitch entities within 40 blocks",
+  "item.aihorror.scanner.tooltip": "Detects glitch entities within 64 blocks",
   "item.aihorror.emf_reader.tooltip": "Measures AI presence (EMF level)",
   "item.aihorror.corrupted_tape.tooltip": "A tape corrupted by the AI - play at your own risk",
   "item.aihorror.guide_book": "AiHorror Guide",
@@ -33,3 +33,4 @@
   "aihorror.advancement.watched.title": "Watched",
   "aihorror.advancement.watched.description": "The AI noticed you"
 }
+

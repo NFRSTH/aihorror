@@ -14,8 +14,6 @@ public class RitualManager {
     public static boolean tryRitual(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
         BlockPos pos = player.blockPosition().below();
-
-
         boolean hasTape = player.getMainHandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE) || player.getOffhandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE);
         if (!hasTape) {
             player.sendSystemMessage(Component.literal("\u00A7c[Ritual] Need corrupted tape in hand"));
@@ -28,20 +26,23 @@ public class RitualManager {
             return false;
         }
         int obsidianCount = 0;
+        int soulCount = 0;
         for (int dx=-2; dx<=2; dx++) for (int dz=-2; dz<=2; dz++) {
             BlockPos p = pos.offset(dx,0,dz);
             if (level.getBlockState(p).is(Blocks.CRYING_OBSIDIAN)) obsidianCount++;
+            if (level.getBlockState(p).is(Blocks.SOUL_SOIL)) soulCount++;
         }
-        if (obsidianCount < 4) {
-            player.sendSystemMessage(Component.literal("\u00A78[Ritual] Need 4+ crying obsidian around you. Found: " + obsidianCount));
+        if (obsidianCount < 8) {
+            player.sendSystemMessage(Component.literal("\u00A78[Ritual] Need 8 crying obsidian around you. Found: " + obsidianCount + "/8"));
             return false;
         }
-
+        if (soulCount < 4) {
+            player.sendSystemMessage(Component.literal("\u00A78[Ritual] Need 4 soul soil around you. Found: " + soulCount + "/4"));
+            return false;
+        }
         player.sendSystemMessage(Component.literal("\u00A7a[Ritual] AI weakened! Now you can kill the Glitch!"));
         level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.0f, 0.5f);
-
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 600, 0));
-
         var e = com.aihorror.entity.ModEntities.GLITCH_ENTITY.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (e != null) {
             e.snapTo(pos.getX(), pos.getY()+1, pos.getZ(), 0,0);
@@ -49,7 +50,6 @@ public class RitualManager {
             e.setHealth(20);
             level.addFreshEntity(e);
         }
-
         if (player.getMainHandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE)) player.getMainHandItem().shrink(1);
         else player.getOffhandItem().shrink(1);
         AiHorror.LOGGER.info("[AiHorror] Ritual success for {}", player.getName().getString());

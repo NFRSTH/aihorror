@@ -208,20 +208,33 @@ public class SurveillanceAI {
     }
 
     private void timeGlitch(ServerPlayer player) {
-
         player.sendSystemMessage(Component.literal(glitchText("*Time snaps*")));
-
         ServerLevel level = (ServerLevel) player.level();
         level.playSound(null, player.blockPosition(), SoundEvents.PORTAL_AMBIENT, SoundSource.HOSTILE, 0.8f, 0.3f);
         addEffect(player, MobEffects.DARKNESS, 100, 0);
         if (AiHorrorConfig.get().allowTimeManipulation) {
-
-            if (player.getRandom().nextBoolean()) {
-
+            try {
+                var server = level.getServer();
+                boolean forward = player.getRandom().nextBoolean();
+                long delta = 6000 + player.getRandom().nextInt(6000);
+                try {
+                    var registry = server.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_CLOCK);
+                    var holder = registry.getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD);
+                    server.clockManager().addTicks(holder, forward ? (int)delta : -(int)delta);
+                } catch (Exception ex) {
+                    long cur = server.getWorldData().overworldData().getGameTime();
+                    long next = forward ? cur + delta : Math.max(0, cur - delta);
+                    server.getWorldData().overworldData().setGameTime(next);
+                }
+                if (forward) {
+                    level.playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 1.0f, 0.2f);
+                    player.sendSystemMessage(Component.literal(glitchText("Time lunges forward " + delta + " ticks")));
+                } else {
+                    level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.0f, 1.5f);
+                    player.sendSystemMessage(Component.literal(glitchText("Time snaps backward " + delta + " ticks")));
+                }
+            } catch (Exception e) {
                 level.playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 1.0f, 0.2f);
-            } else {
-
-                level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.0f, 1.5f);
             }
         }
     }
@@ -271,6 +284,7 @@ public class SurveillanceAI {
     }
 
     private void spawnGlitchNear(ServerPlayer player) {
+        if (player.getRandom().nextInt(100) >= AiHorrorConfig.get().glitchEntitySpawnChance) return;
         PlayerProfile prof = profiles.get(player.getUUID());
         if (prof != null && globalTick - prof.lastSeenGlitchTick < 200) return;
         BlockPos pos = findSpawnPosNear(player, 8, 15);
@@ -357,3 +371,5 @@ public class SurveillanceAI {
 
     public void removeProfile(UUID uuid) { profiles.remove(uuid); }
 }
+
+
