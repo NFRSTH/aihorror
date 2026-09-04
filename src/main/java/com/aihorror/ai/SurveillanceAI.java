@@ -38,13 +38,13 @@ public class SurveillanceAI {
         int ticksStared = 0;
         int fearLevel = 0;
         long lastSeenGlitchTick = -10000;
-        int ticksSinceSleep = 0; // sleep deprivation
+        int ticksSinceSleep = 0;
         int jumpscareCooldown = 0;
         int deathCount = 0;
     }
 
     private String glitchText(String s) {
-        // Glitched horror-like English: random insert ÔûêÔûôÔûÆÔûæ and case flicker
+
         StringBuilder sb = new StringBuilder();
         Random r = new Random();
         for (char c : s.toCharArray()) {
@@ -62,11 +62,11 @@ public class SurveillanceAI {
         p.actions++;
         p.fearLevel = Math.min(100, p.fearLevel + 2);
         float factor = AiHorrorConfig.get().intensityFactor();
-        // Sleep deprivation escalates: every 24000 ticks without sleep adds fear
+
         if (p.ticksSinceSleep > 24000) {
             p.fearLevel = Math.min(100, p.fearLevel + AiHorrorConfig.get().sleepDeprivationFactor);
         }
-        // Dark-only hunt unless max intensity
+
         ServerLevel lvl = (ServerLevel) player.level();
         int light = lvl.getBrightness(LightLayer.BLOCK, player.blockPosition());
         boolean isDark = light <= 5;
@@ -79,7 +79,7 @@ public class SurveillanceAI {
 
     public void tick(MinecraftServer server) {
         if (!AiHorrorConfig.get().enabled) return;
-        // init world seed salt for random personality per world
+
         if (worldSeed == 0) {
             try {
                 worldSeed = server.overworld().getSeed() ^ AiHorrorConfig.get().worldSeedSalt;
@@ -95,7 +95,7 @@ public class SurveillanceAI {
             p.ticksSinceSleep++;
             if (p.jumpscareCooldown > 0) p.jumpscareCooldown--;
 
-            // Dark check
+
             int light = level.getBrightness(LightLayer.BLOCK, player.blockPosition());
             boolean isDark = light <= 5;
             boolean canHunt = isDark || AiHorrorConfig.get().isMaxIntensity();
@@ -113,13 +113,13 @@ public class SurveillanceAI {
             }
             p.lastPos = player.blockPosition().immutable();
 
-            // Punished hiding
+
             if (p.hideCount > 200 && globalTick % 100 == 0) {
                 player.sendSystemMessage(Component.literal(glitchText("[AI] I see you hiding...")));
                 p.fearLevel = Math.min(100, p.fearLevel + 10);
                 p.hideCount = 0;
                 if (randomChance(0.7f * AiHorrorConfig.get().intensityFactor())) {
-                    // respect performance limit
+
                     long glitchCount = level.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, player.getBoundingBox().inflate(80)).size();
                     if (glitchCount < AiHorrorConfig.get().maxGlitchEntities) spawnGlitchNear(player);
                 }
@@ -130,14 +130,14 @@ public class SurveillanceAI {
                 p.ticksAlone = 0;
             }
 
-            // Sleep deprivation escalation: less you sleep, more fear
-            if (p.ticksSinceSleep > 48000) { // 2 days no sleep
+
+            if (p.ticksSinceSleep > 48000) {
                 p.fearLevel = Math.min(100, p.fearLevel + 1);
                 if (globalTick % 400 == 0) whisper(player, glitchText("You need to sleep... but I won''t let you"));
             }
 
             float horrorChance = (p.fearLevel / 100f) * AiHorrorConfig.get().intensityFactor() * 0.06f;
-            // Seed personality varies horror chance slightly
+
             horrorChance *= (0.8f + seedRandom.nextFloat()*0.4f);
             if (randomChance(horrorChance) && p.jumpscareCooldown==0) {
                 triggerSurveillanceEvent(player, p);
@@ -152,16 +152,16 @@ public class SurveillanceAI {
     }
 
     private void triggerSurveillanceEvent(ServerPlayer player, PlayerProfile p) {
-        // Performance limit check
+
         ServerLevel lvl = (ServerLevel) player.level();
         long glitchCount = lvl.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, player.getBoundingBox().inflate(80)).size();
         int r = player.getRandom().nextInt(10);
-        // occasional jumpscare: only if cooldown 0
+
         if (r == 4 && p.jumpscareCooldown > 0) r = (r+1)%10;
         switch (r) {
             case 0 -> whisper(player, glitchText("I am watching you, " + player.getName().getString() + "..."));
-            case 1 -> playSound(player, SoundEvents.AMBIENT_CAVE.value(), 1.5f, 0.5f + seedRandom.nextFloat()*0.2f); // vanilla edited pitch
-            case 2 -> timeGlitch(player); // can snap both ways
+            case 1 -> playSound(player, SoundEvents.AMBIENT_CAVE.value(), 1.5f, 0.5f + seedRandom.nextFloat()*0.2f);
+            case 2 -> timeGlitch(player);
             case 3 -> fakeDoorSound(player);
             case 4 -> { if (AiHorrorConfig.get().jumpscaresEnabled) { jumpscare(player); p.jumpscareCooldown = AiHorrorConfig.get().jumpscareCooldownTicks; } }
             case 5 -> { if (glitchCount < AiHorrorConfig.get().maxGlitchEntities) spawnGlitchNear(player); else whisper(player, glitchText("Too many eyes...")); }
@@ -188,10 +188,10 @@ public class SurveillanceAI {
     }
 
     private void whisper(ServerPlayer player, String msg) {
-        // Shader glitch trigger via effect
+
         if (AiHorrorConfig.get().shaderGlitchEnabled && player.getRandom().nextFloat() < 0.4f) {
             player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0));
-            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 100, 0)); // nausea as shader glitch approximation
+            player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 100, 0));
         }
         player.sendSystemMessage(Component.literal(msg));
         if (AiHorrorConfig.get().jumpscaresEnabled && player.getRandom().nextFloat() < 0.25f) {
@@ -202,25 +202,25 @@ public class SurveillanceAI {
 
     private void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent event, float vol, float pitch) {
         ServerLevel lvl = (ServerLevel) player.level();
-        // vanilla edited: slightly random pitch to fit horror
+
         float editedPitch = pitch * (0.8f + player.getRandom().nextFloat()*0.4f);
         lvl.playSound(null, player.blockPosition(), event, SoundSource.HOSTILE, vol, editedPitch);
     }
 
     private void timeGlitch(ServerPlayer player) {
-        // Snap either day->night or night->day randomly
+
         player.sendSystemMessage(Component.literal(glitchText("*Time snaps*")));
-        // Use levelData via command? Simulate by sending title and darkness, actual time change via corruption manager if allowed
+
         ServerLevel level = (ServerLevel) player.level();
         level.playSound(null, player.blockPosition(), SoundEvents.PORTAL_AMBIENT, SoundSource.HOSTILE, 0.8f, 0.3f);
         addEffect(player, MobEffects.DARKNESS, 100, 0);
         if (AiHorrorConfig.get().allowTimeManipulation) {
-            // Both directions: random
+
             if (player.getRandom().nextBoolean()) {
-                // day to night
+
                 level.playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 1.0f, 0.2f);
             } else {
-                // night to day effect
+
                 level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 1.0f, 1.5f);
             }
         }
@@ -242,7 +242,7 @@ public class SurveillanceAI {
         playSound(player, SoundEvents.ELDER_GUARDIAN_CURSE, 2.0f, 0.5f);
         addEffect(player, MobEffects.BLINDNESS, 40, 0);
         addEffect(player, MobEffects.SLOWNESS, 40, 2);
-        addEffect(player, MobEffects.NAUSEA, 80, 0); // shader glitch
+        addEffect(player, MobEffects.NAUSEA, 80, 0);
         ServerLevel lvl = (ServerLevel) player.level();
         lvl.playSound(null, player.blockPosition(), ModSounds.JUMPSCARE_EVENT, SoundSource.HOSTILE, 2.0f, 1.0f);
     }
@@ -255,7 +255,7 @@ public class SurveillanceAI {
 
     private void corruptNearby(ServerPlayer player) {
         if (!AiHorrorConfig.get().allowWorldCorruption) return;
-        // respect max corruption per tick
+
         CorruptionManager.corruptAround(player, Math.min(6, AiHorrorConfig.get().maxCorruptionPerTick));
     }
 
@@ -313,7 +313,7 @@ public class SurveillanceAI {
 
     public void handlePlayerSleep(ServerPlayer player) {
         PlayerProfile p = profiles.computeIfAbsent(player.getUUID(), k -> new PlayerProfile());
-        p.ticksSinceSleep = 0; // reset sleep deprivation
+        p.ticksSinceSleep = 0;
         onPlayerAction(player, "sleep");
         if (p.fearLevel > 20) {
             whisper(player, glitchText("You can''t sleep while I watch."));
@@ -345,7 +345,7 @@ public class SurveillanceAI {
         p.deathCount++;
         p.fearLevel = Math.min(100, p.fearLevel + 5);
         if (AiHorrorConfig.get().allowDeathCorruption) {
-            // death corruption: heavily corrupt around death pos normally off to protect, but if enabled via command then do
+
             CorruptionManager.corruptAround(player, 12);
             player.sendSystemMessage(Component.literal(glitchText("[AI] Your death feeds me... world corrupts")));
         } else {

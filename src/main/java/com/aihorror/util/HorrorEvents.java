@@ -19,7 +19,7 @@ public class HorrorEvents {
                     SurveillanceAI.getInstance().handlePlayerSleep(p);
                 }
             }
-            // init seed personality once
+
             if (server.overworld() != null) {
                 SurveillanceAI.getInstance().setWorldSeed(server.overworld().getSeed());
             }
@@ -29,7 +29,7 @@ public class HorrorEvents {
                 SurveillanceAI.getInstance().handlePlayerDeath(sp);
             }
         });
-        // F7: prevent memory leak - clean profile on disconnect
+
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             SurveillanceAI.getInstance().removeProfile(handler.getPlayer().getUUID());
         });

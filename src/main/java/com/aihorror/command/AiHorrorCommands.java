@@ -35,7 +35,7 @@ public class AiHorrorCommands {
             .then(Commands.literal("intensity").then(Commands.argument("value", IntegerArgumentType.integer(0,5)).executes(ctx -> {
                 int v = IntegerArgumentType.getInteger(ctx, "value");
                 AiHorrorConfig.get().setIntensity(v);
-                // file persistence test already in setIntensity, also verify here
+
                 try {
                     String json = java.nio.file.Files.readString(AiHorrorConfig.getConfigPath());
                     ctx.getSource().sendSuccess(() -> Component.literal("\u00A7a[AiHorror] Intensity set to " + v + "/5 " + (v==5?"(NO LIGHT RULE)":"(dark-only)") + " | File: " + json.substring(0, Math.min(60, json.length())) + "..."), true);

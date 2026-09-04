@@ -13,10 +13,10 @@ public class AiHorrorConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("aihorror.json");
 
     public boolean enabled = true;
-    public int intensity = 2; // 0-5 scale (was 0-100, now 0-5 perfect)
+    public int intensity = 2;
     public boolean allowWorldCorruption = true;
     public boolean allowTimeManipulation = true;
-    public boolean allowBuildDestruction = false; // gated false by default - protect builds
+    public boolean allowBuildDestruction = false;
     public boolean jumpscaresEnabled = true;
     public boolean foundFootageEnabled = true;
     public int glitchEntitySpawnChance = 30;
@@ -41,7 +41,7 @@ public class AiHorrorConfig {
                 String json = Files.readString(CONFIG_PATH);
                 INSTANCE = GSON.fromJson(json, AiHorrorConfig.class);
                 if (INSTANCE == null) INSTANCE = new AiHorrorConfig();
-                // migrate old 0-100 to 0-5 if needed
+
                 if (INSTANCE.intensity > 5) {
                     INSTANCE.intensity = Math.round(INSTANCE.intensity / 20.0f);
                     INSTANCE.intensity = Math.max(0, Math.min(5, INSTANCE.intensity));
@@ -70,7 +70,7 @@ public class AiHorrorConfig {
     public void setIntensity(int v) {
         intensity = Math.max(0, Math.min(5, v));
         save();
-        // persistence test: reload and verify
+
         try {
             String json = Files.readString(CONFIG_PATH);
             AiHorrorConfig reloaded = GSON.fromJson(json, AiHorrorConfig.class);

@@ -26,7 +26,7 @@ public class ModMenuIntegration implements ModMenuApi {
         protected void init() {
             AiHorrorConfig cfg = AiHorrorConfig.get();
             int y = 30;
-            // Intensity button cycles 0-5
+
             addRenderableWidget(Button.builder(Component.literal("Intensity: " + cfg.intensity + "/5"), btn -> {
                 int next = (cfg.intensity + 1) % 6;
                 cfg.setIntensity(next);

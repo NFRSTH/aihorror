@@ -20,11 +20,11 @@ public class GlitchEntityRenderer extends HumanoidMobRenderer<GlitchEntity, Huma
 
     @Override
     public Identifier getTextureLocation(HumanoidRenderState state) {
-        // Use all 3 user images from Downloads for glitch flicker - cycles every 150ms
+
         long t = System.currentTimeMillis() / 150 % 3;
-        if (t == 0) return TEXTURE; // glitch-5167543797.png - your first download
-        if (t == 1) return CREEPY; // glitch_creepy-3778253060.png - your second
-        return ALT; // glitch_alt-3592543168.png - your third
+        if (t == 0) return TEXTURE;
+        if (t == 1) return CREEPY;
+        return ALT;
     }
 
     @Override

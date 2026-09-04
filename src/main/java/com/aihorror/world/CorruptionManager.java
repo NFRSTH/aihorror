@@ -52,7 +52,7 @@ public class CorruptionManager {
             if (state.isAir() || state.is(Blocks.BEDROCK) || state.is(Blocks.BARRIER)) continue;
             if (state.is(Blocks.GRASS_BLOCK) || state.is(Blocks.DIRT) || state.is(Blocks.STONE) || state.is(Blocks.COBBLESTONE) || state.is(Blocks.SAND)) {
                 double r = RANDOM.nextDouble();
-                // Glitch blocked like purple and black missing texture: use corrupted block (custom purple/black) + crying obsidian + soul soil mix
+
                 if (r < 0.5) level.setBlock(pos, ModBlocks.CORRUPTED_BLOCK.defaultBlockState(), 3);
                 else if (r < 0.75) level.setBlock(pos, Blocks.CRYING_OBSIDIAN.defaultBlockState(), 3);
                 else level.setBlock(pos, Blocks.SOUL_SOIL.defaultBlockState(), 3);
@@ -73,7 +73,7 @@ public class CorruptionManager {
         ServerLevel level = (ServerLevel) player.level();
         BlockPos pos = findNearbyGround(player, 12);
         if (pos == null) return;
-        // Full Story: 5+ logs via chest with multiple papers
+
         level.setBlock(pos, Blocks.CHEST.defaultBlockState(), 3);
         var be = level.getBlockEntity(pos);
         if (be instanceof net.minecraft.world.level.block.entity.ChestBlockEntity chest) {
@@ -84,7 +84,7 @@ public class CorruptionManager {
                 paper.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal("\u00A78" + story[i]));
                 chest.setItem(i, paper);
             }
-            // add corrupted tape
+
             chest.setItem(4, new net.minecraft.world.item.ItemStack(com.aihorror.item.ModItems.CORRUPTED_TAPE));
         }
         player.sendSystemMessage(Component.literal("\u00A77\u00A7oYou found something... \u00A78[Found Footage: Full Story fragment at " + pos.toShortString() + "]"));

@@ -14,8 +14,8 @@ public class RitualManager {
     public static boolean tryRitual(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
         BlockPos pos = player.blockPosition().below();
-        // Check ritual: 8 crying obsidian in ring, 4 soul soil corners, player holding corrupted tape
-        // Simplified: check if player has tape and is at midnight with 4 crying obsidian nearby
+
+
         boolean hasTape = player.getMainHandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE) || player.getOffhandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE);
         if (!hasTape) {
             player.sendSystemMessage(Component.literal("\u00A7c[Ritual] Need corrupted tape in hand"));
@@ -36,20 +36,20 @@ public class RitualManager {
             player.sendSystemMessage(Component.literal("\u00A78[Ritual] Need 4+ crying obsidian around you. Found: " + obsidianCount));
             return false;
         }
-        // Success: weaken AI
+
         player.sendSystemMessage(Component.literal("\u00A7a[Ritual] AI weakened! Now you can kill the Glitch!"));
         level.playSound(null, pos, SoundEvents.BEACON_ACTIVATE, SoundSource.HOSTILE, 2.0f, 0.5f);
-        // Give effect and spawn weakened glitch that can be killed
+
         player.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 600, 0));
-        // Spawn ritual glitch
+
         var e = com.aihorror.entity.ModEntities.GLITCH_ENTITY.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (e != null) {
             e.snapTo(pos.getX(), pos.getY()+1, pos.getZ(), 0,0);
             e.setTargetPlayer(player);
-            e.setHealth(20); // weakened
+            e.setHealth(20);
             level.addFreshEntity(e);
         }
-        // consume tape
+
         if (player.getMainHandItem().is(com.aihorror.item.ModItems.CORRUPTED_TAPE)) player.getMainHandItem().shrink(1);
         else player.getOffhandItem().shrink(1);
         AiHorror.LOGGER.info("[AiHorror] Ritual success for {}", player.getName().getString());
