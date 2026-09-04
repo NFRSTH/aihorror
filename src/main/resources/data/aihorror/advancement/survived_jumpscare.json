@@ -1,0 +1,15 @@
+{
+  "parent": "aihorror:watched",
+  "display": {
+    "icon": { "id": "minecraft:soul_lantern" },
+    "title": { "translate": "aihorror.advancement.survived_jumpscare.title" },
+    "description": { "translate": "aihorror.advancement.survived_jumpscare.description" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}

@@ -20,7 +20,6 @@ public class GlitchEntityRenderer extends HumanoidMobRenderer<GlitchEntity, Huma
 
     @Override
     public Identifier getTextureLocation(HumanoidRenderState state) {
-
         long t = System.currentTimeMillis() / 150 % 3;
         if (t == 0) return TEXTURE;
         if (t == 1) return CREEPY;
@@ -30,5 +29,10 @@ public class GlitchEntityRenderer extends HumanoidMobRenderer<GlitchEntity, Huma
     @Override
     public HumanoidRenderState createRenderState() {
         return new HumanoidRenderState();
+    }
+
+    @Override
+    public void extractRenderState(GlitchEntity entity, HumanoidRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
     }
 }

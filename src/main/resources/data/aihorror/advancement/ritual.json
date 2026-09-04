@@ -1,0 +1,15 @@
+{
+  "parent": "aihorror:watched",
+  "display": {
+    "icon": { "id": "aihorror:corrupted_tape" },
+    "title": { "translate": "aihorror.advancement.ritual.title" },
+    "description": { "translate": "aihorror.advancement.ritual.description" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}

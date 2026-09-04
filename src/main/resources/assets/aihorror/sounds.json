@@ -2,5 +2,8 @@
   "jumpscare": { "sounds": [{ "name": "aihorror:jumpscare", "stream": false }], "subtitle": "subtitles.aihorror.jumpscare" },
   "whisper": { "sounds": [{ "name": "aihorror:whisper", "stream": false }], "subtitle": "subtitles.aihorror.whisper" },
   "glitch_ambient": { "sounds": [{ "name": "aihorror:glitch_ambient", "stream": true }], "subtitle": "subtitles.aihorror.glitch_ambient" },
-  "static_loop": { "sounds": [{ "name": "aihorror:static_loop", "stream": true }], "subtitle": "subtitles.aihorror.static_loop" }
+  "static_loop": { "sounds": [{ "name": "aihorror:static_loop", "stream": true }], "subtitle": "subtitles.aihorror.static_loop" },
+  "heartbeat_loop": { "sounds": [{ "name": "aihorror:heartbeat_loop", "stream": true }], "subtitle": "subtitles.aihorror.heartbeat_loop" },
+  "steps": { "sounds": [{ "name": "aihorror:steps", "stream": false }], "subtitle": "subtitles.aihorror.steps" },
+  "door_creak": { "sounds": [{ "name": "aihorror:door_creak", "stream": false }], "subtitle": "subtitles.aihorror.door_creak" }
 }

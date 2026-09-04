@@ -1,0 +1,18 @@
+{
+  "parent": "aihorror:watched",
+  "display": {
+    "icon": { "id": "aihorror:corrupted_block" },
+    "title": { "translate": "aihorror.advancement.first_corruption.title" },
+    "description": { "translate": "aihorror.advancement.first_corruption.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "placed_block": {
+      "trigger": "minecraft:placed_block",
+      "conditions": { "block": "aihorror:corrupted_block" }
+    }
+  }
+}

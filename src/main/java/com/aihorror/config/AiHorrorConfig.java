@@ -30,6 +30,20 @@ public class AiHorrorConfig {
     public boolean shaderGlitchEnabled = true;
     public long worldSeedSalt = 0;
     public int sleepDeprivationFactor = 1;
+    public boolean fakeChatEnabled = true;
+    public boolean fakeJoinLeaveEnabled = true;
+    public boolean inventoryGhostEnabled = true;
+    public boolean veinCorruptionEnabled = true;
+    public boolean redstoneFlickerEnabled = true;
+    public boolean fakeCaveSoundEnabled = true;
+    public int fakeChatCooldownTicks = 12000;
+    public int fakeJoinCooldownTicks = 18000;
+    public int ghostItemCooldownTicks = 8000;
+    public int veinCorruptionCooldownTicks = 10000;
+    public int redstoneFlickerCooldownTicks = 6000;
+    public int caveSoundCooldownTicks = 7000;
+    public int banishTicksRemaining = 0;
+    public long lastRitualTime = 0;
 
     private static AiHorrorConfig INSTANCE = new AiHorrorConfig();
 
@@ -41,7 +55,6 @@ public class AiHorrorConfig {
                 String json = Files.readString(CONFIG_PATH);
                 INSTANCE = GSON.fromJson(json, AiHorrorConfig.class);
                 if (INSTANCE == null) INSTANCE = new AiHorrorConfig();
-
                 if (INSTANCE.intensity > 5) {
                     INSTANCE.intensity = Math.round(INSTANCE.intensity / 20.0f);
                     INSTANCE.intensity = Math.max(0, Math.min(5, INSTANCE.intensity));
@@ -70,7 +83,6 @@ public class AiHorrorConfig {
     public void setIntensity(int v) {
         intensity = Math.max(0, Math.min(5, v));
         save();
-
         try {
             String json = Files.readString(CONFIG_PATH);
             AiHorrorConfig reloaded = GSON.fromJson(json, AiHorrorConfig.class);
@@ -83,6 +95,22 @@ public class AiHorrorConfig {
             AiHorror.LOGGER.error("[AiHorror] Persistence test error", e);
         }
     }
+
+    public boolean isBanished() { return banishTicksRemaining > 0; }
+
+    public void setBanished(int ticks) {
+        banishTicksRemaining = ticks;
+        lastRitualTime = System.currentTimeMillis();
+        save();
+    }
+
+    public void tickBanish() {
+        if (banishTicksRemaining > 0) {
+            banishTicksRemaining--;
+            if (banishTicksRemaining % 1200 == 0) save();
+        }
+    }
+
     public float intensityFactor() { return intensity / 5.0f; }
     public boolean isMaxIntensity() { return intensity >= 5; }
     public static Path getConfigPath() { return CONFIG_PATH; }

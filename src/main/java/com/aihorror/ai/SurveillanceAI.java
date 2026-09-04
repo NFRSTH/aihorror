@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.LightLayer;
-
+import net.minecraft.world.level.block.Blocks;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -27,6 +27,7 @@ public class SurveillanceAI {
 
     private final Map<UUID, PlayerProfile> profiles = new HashMap<>();
     private int globalTick = 0;
+    private static final Random RANDOM = new Random();
     private long worldSeed = 0;
     private Random seedRandom = new Random();
 
@@ -41,10 +42,15 @@ public class SurveillanceAI {
         int ticksSinceSleep = 0;
         int jumpscareCooldown = 0;
         int deathCount = 0;
+        int fakeChatCooldown = 0;
+        int fakeJoinCooldown = 0;
+        int ghostItemCooldown = 0;
+        int veinCorruptionCooldown = 0;
+        int redstoneFlickerCooldown = 0;
+        int caveSoundCooldown = 0;
     }
 
     private String glitchText(String s) {
-
         StringBuilder sb = new StringBuilder();
         Random r = new Random();
         for (char c : s.toCharArray()) {
@@ -58,15 +64,14 @@ public class SurveillanceAI {
 
     public void onPlayerAction(ServerPlayer player, String action) {
         if (!AiHorrorConfig.get().enabled) return;
+        if (AiHorrorConfig.get().isBanished()) return;
         PlayerProfile p = profiles.computeIfAbsent(player.getUUID(), k -> new PlayerProfile());
         p.actions++;
         p.fearLevel = Math.min(100, p.fearLevel + 2);
         float factor = AiHorrorConfig.get().intensityFactor();
-
         if (p.ticksSinceSleep > 24000) {
             p.fearLevel = Math.min(100, p.fearLevel + AiHorrorConfig.get().sleepDeprivationFactor);
         }
-
         ServerLevel lvl = (ServerLevel) player.level();
         int light = lvl.getBrightness(LightLayer.BLOCK, player.blockPosition());
         boolean isDark = light <= 5;
@@ -79,7 +84,8 @@ public class SurveillanceAI {
 
     public void tick(MinecraftServer server) {
         if (!AiHorrorConfig.get().enabled) return;
-
+        AiHorrorConfig.get().tickBanish();
+        if (AiHorrorConfig.get().isBanished()) return;
         if (worldSeed == 0) {
             try {
                 worldSeed = server.overworld().getSeed() ^ AiHorrorConfig.get().worldSeedSalt;
@@ -94,70 +100,190 @@ public class SurveillanceAI {
             ServerLevel level = (ServerLevel) player.level();
             p.ticksSinceSleep++;
             if (p.jumpscareCooldown > 0) p.jumpscareCooldown--;
-
-
+            if (p.fakeChatCooldown > 0) p.fakeChatCooldown--;
+            if (p.fakeJoinCooldown > 0) p.fakeJoinCooldown--;
+            if (p.ghostItemCooldown > 0) p.ghostItemCooldown--;
+            if (p.veinCorruptionCooldown > 0) p.veinCorruptionCooldown--;
+            if (p.redstoneFlickerCooldown > 0) p.redstoneFlickerCooldown--;
+            if (p.caveSoundCooldown > 0) p.caveSoundCooldown--;
             int light = level.getBrightness(LightLayer.BLOCK, player.blockPosition());
             boolean isDark = light <= 5;
             boolean canHunt = isDark || AiHorrorConfig.get().isMaxIntensity();
             if (!canHunt) continue;
-
             boolean alone = server.getPlayerList().getPlayers().stream()
                     .filter(other -> other != player)
                     .noneMatch(other -> other.level() == level && other.distanceTo(player) < 50);
             if (alone) p.ticksAlone++; else p.ticksAlone = 0;
-
             if (player.blockPosition().equals(p.lastPos)) {
                 int blockLight = level.getBrightness(LightLayer.BLOCK, player.blockPosition());
                 if (blockLight <= 3) p.hideCount++;
                 else p.hideCount = 0;
             }
             p.lastPos = player.blockPosition().immutable();
-
-
             if (p.hideCount > 200 && globalTick % 100 == 0) {
                 player.sendSystemMessage(Component.literal(glitchText("[AI] I see you hiding...")));
                 p.fearLevel = Math.min(100, p.fearLevel + 10);
                 p.hideCount = 0;
                 if (randomChance(0.7f * AiHorrorConfig.get().intensityFactor())) {
-
                     long glitchCount = level.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, player.getBoundingBox().inflate(80)).size();
                     if (glitchCount < AiHorrorConfig.get().maxGlitchEntities) spawnGlitchNear(player);
                 }
             }
-
             if (p.ticksAlone > 600) {
                 triggerAloneEvent(player, p);
                 p.ticksAlone = 0;
             }
-
-
             if (p.ticksSinceSleep > 48000) {
                 p.fearLevel = Math.min(100, p.fearLevel + 1);
                 if (globalTick % 400 == 0) whisper(player, glitchText("You need to sleep... but I won''t let you"));
             }
-
             float horrorChance = (p.fearLevel / 100f) * AiHorrorConfig.get().intensityFactor() * 0.06f;
-
             horrorChance *= (0.8f + seedRandom.nextFloat()*0.4f);
             if (randomChance(horrorChance) && p.jumpscareCooldown==0) {
                 triggerSurveillanceEvent(player, p);
             }
-
             if (globalTick % 200 == 0 && p.fearLevel > 0) p.fearLevel--;
-
             if (player.getRandom().nextFloat() < 0.005f * AiHorrorConfig.get().intensityFactor()) {
                 handleStare(player, p);
+            }
+            if (globalTick % 120 == 0) {
+                tryAmbientEvents(player, p);
             }
         }
     }
 
-    private void triggerSurveillanceEvent(ServerPlayer player, PlayerProfile p) {
+    private void tryAmbientEvents(ServerPlayer player, PlayerProfile p) {
+        float f = AiHorrorConfig.get().intensityFactor();
+        if (AiHorrorConfig.get().fakeChatEnabled && p.fakeChatCooldown==0 && randomChance(0.02f*f)) { fakeChatMessage(player, p); }
+        if (AiHorrorConfig.get().fakeJoinLeaveEnabled && p.fakeJoinCooldown==0 && randomChance(0.015f*f)) { fakeJoinLeave(player, p); }
+        if (AiHorrorConfig.get().inventoryGhostEnabled && p.ghostItemCooldown==0 && randomChance(0.018f*f)) { inventoryGhostItem(player, p); }
+        if (AiHorrorConfig.get().veinCorruptionEnabled && p.veinCorruptionCooldown==0 && randomChance(0.012f*f)) { veinCorruptionSpread(player, p); }
+        if (AiHorrorConfig.get().redstoneFlickerEnabled && p.redstoneFlickerCooldown==0 && randomChance(0.02f*f)) { redstoneFlicker(player, p); }
+        if (AiHorrorConfig.get().fakeCaveSoundEnabled && p.caveSoundCooldown==0 && randomChance(0.025f*f)) { fakeCaveSoundFar(player, p); }
+    }
 
+    private void fakeChatMessage(ServerPlayer player, PlayerProfile p) {
+        String[] fakes = new String[]{
+            "<" + player.getName().getString() + "> help me",
+            "<" + player.getName().getString() + "> don''t look behind you",
+            "<Steve> I see it too",
+            "<Alex> it''s inside the walls",
+            glitchText("You are not alone")
+        };
+        String msg = fakes[player.getRandom().nextInt(fakes.length)];
+        player.sendSystemMessage(Component.literal("\u00A77" + msg));
+        player.sendSystemMessage(Component.literal("\u00A78[AI] fake chat - not real"));
+        p.fakeChatCooldown = AiHorrorConfig.get().fakeChatCooldownTicks;
+    }
+
+    private void fakeJoinLeave(ServerPlayer player, PlayerProfile p) {
+        boolean join = player.getRandom().nextBoolean();
+        String[] names = new String[]{"Herobrine","Entity303","Null","Glitch","_AI_"};
+        String n = names[player.getRandom().nextInt(names.length)];
+        if (join) {
+            player.sendSystemMessage(Component.literal("\u00A7e" + n + " joined the game"));
+            player.level().playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.PLAYERS, 0.5f, 2.0f);
+        } else {
+            player.sendSystemMessage(Component.literal("\u00A7e" + n + " left the game"));
+        }
+        p.fakeJoinCooldown = AiHorrorConfig.get().fakeJoinCooldownTicks;
+    }
+
+    private void inventoryGhostItem(ServerPlayer player, PlayerProfile p) {
+        var inv = player.getInventory();
+        int slot = player.getRandom().nextInt(36);
+        var ghost = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PAPER);
+        ghost.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(glitchText("Do you see me?")));
+        var prev = inv.getItem(slot).copy();
+        inv.setItem(slot, ghost);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 0.3f);
+        player.sendSystemMessage(Component.literal(glitchText("[AI] Your inventory feels... wrong. Ghost item in slot " + slot)));
+        new Thread(() -> {
+            try { Thread.sleep(6000); } catch (Exception ignored) {}
+            player.level().getServer().execute(() -> {
+                if (player.getInventory().getItem(slot).is(net.minecraft.world.item.Items.PAPER)) {
+                    player.getInventory().setItem(slot, prev);
+                    player.sendSystemMessage(Component.literal("\u00A78Ghost item faded..."));
+                }
+            });
+        }).start();
+        p.ghostItemCooldown = AiHorrorConfig.get().ghostItemCooldownTicks;
+    }
+
+    private void veinCorruptionSpread(ServerPlayer player, PlayerProfile p) {
+        if (!AiHorrorConfig.get().allowWorldCorruption) return;
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos start = findNearbyOre(level, player.blockPosition(), 12);
+        if (start == null) start = player.blockPosition().offset(player.getRandom().nextInt(8)-4, -2, player.getRandom().nextInt(8)-4);
+        for (int i=0;i<4+player.getRandom().nextInt(4);i++) {
+            BlockPos pos = start.offset(player.getRandom().nextInt(5)-2, player.getRandom().nextInt(3)-1, player.getRandom().nextInt(5)-2);
+            if (!level.isLoaded(pos)) continue;
+            var state = level.getBlockState(pos);
+            if (state.is(Blocks.STONE) || state.is(Blocks.DEEPSLATE) || state.is(Blocks.COAL_ORE) || state.is(Blocks.IRON_ORE) || state.is(Blocks.COPPER_ORE)) {
+                level.setBlock(pos, com.aihorror.block.ModBlocks.CORRUPTED_BLOCK.defaultBlockState(), 3);
+            }
+        }
+        level.playSound(null, start, SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 0.5f, 0.2f);
+        p.veinCorruptionCooldown = AiHorrorConfig.get().veinCorruptionCooldownTicks;
+    }
+
+    private BlockPos findNearbyOre(ServerLevel level, BlockPos center, int radius) {
+        for (int i=0;i<20;i++) {
+            int dx = RANDOM.nextInt(radius*2)-radius;
+            int dy = RANDOM.nextInt(8)-4;
+            int dz = RANDOM.nextInt(radius*2)-radius;
+            BlockPos pos = center.offset(dx,dy,dz);
+            if (!level.isLoaded(pos)) continue;
+            var s = level.getBlockState(pos);
+            if (s.is(Blocks.COAL_ORE) || s.is(Blocks.IRON_ORE) || s.is(Blocks.COPPER_ORE) || s.is(Blocks.GOLD_ORE) || s.is(Blocks.REDSTONE_ORE) || s.is(Blocks.LAPIS_ORE)) return pos;
+        }
+        return null;
+    }
+
+    private void redstoneFlicker(ServerPlayer player, PlayerProfile p) {
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos center = player.blockPosition();
+        int flickered = 0;
+        for (int dx=-6; dx<=6; dx++) for (int dy=-3; dy<=3; dy++) for (int dz=-6; dz<=6; dz++) {
+            BlockPos pos = center.offset(dx,dy,dz);
+            if (!level.isLoaded(pos)) continue;
+            var state = level.getBlockState(pos);
+            if (state.is(Blocks.REDSTONE_LAMP) || state.is(Blocks.REDSTONE_TORCH) || state.is(Blocks.REDSTONE_WALL_TORCH)) {
+                level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                level.scheduleTick(pos, Blocks.AIR, 40 + RANDOM.nextInt(40));
+                flickered++;
+                if (flickered > 6) break;
+            }
+            if (state.is(Blocks.TORCH) || state.is(Blocks.WALL_TORCH)) {
+                if (RANDOM.nextFloat()<0.3f) {
+                    level.destroyBlock(pos, false);
+                    level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.4f, 0.8f);
+                    flickered++;
+                }
+            }
+        }
+        if (flickered>0) {
+            level.playSound(null, center, SoundEvents.REDSTONE_TORCH_BURNOUT, SoundSource.BLOCKS, 1.0f, 0.6f);
+            player.sendSystemMessage(Component.literal(glitchText("[AI] Lights flicker...")));
+        }
+        p.redstoneFlickerCooldown = AiHorrorConfig.get().redstoneFlickerCooldownTicks;
+    }
+
+    private void fakeCaveSoundFar(ServerPlayer player, PlayerProfile p) {
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos far = player.blockPosition().offset(player.getRandom().nextInt(30)-15, 0, player.getRandom().nextInt(30)-15);
+        var choices = new net.minecraft.sounds.SoundEvent[]{SoundEvents.AMBIENT_CAVE.value(), SoundEvents.WARDEN_AMBIENT, SoundEvents.SCULK_CLICKING};
+        var ev = choices[player.getRandom().nextInt(choices.length)];
+        level.playSound(null, far, ev, SoundSource.HOSTILE, 1.2f, 0.4f + player.getRandom().nextFloat()*0.4f);
+        if (player.getRandom().nextFloat()<0.3f) level.playSound(null, player.blockPosition(), ModSounds.STEPS_EVENT, SoundSource.HOSTILE, 0.7f, 0.8f);
+        p.caveSoundCooldown = AiHorrorConfig.get().caveSoundCooldownTicks;
+    }
+
+    private void triggerSurveillanceEvent(ServerPlayer player, PlayerProfile p) {
         ServerLevel lvl = (ServerLevel) player.level();
         long glitchCount = lvl.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, player.getBoundingBox().inflate(80)).size();
-        int r = player.getRandom().nextInt(10);
-
-        if (r == 4 && p.jumpscareCooldown > 0) r = (r+1)%10;
+        int r = player.getRandom().nextInt(16);
+        if (r == 4 && p.jumpscareCooldown > 0) r = (r+1)%16;
         switch (r) {
             case 0 -> whisper(player, glitchText("I am watching you, " + player.getName().getString() + "..."));
             case 1 -> playSound(player, SoundEvents.AMBIENT_CAVE.value(), 1.5f, 0.5f + seedRandom.nextFloat()*0.2f);
@@ -169,6 +295,12 @@ public class SurveillanceAI {
             case 7 -> blindnessFlicker(player);
             case 8 -> whisper(player, glitchText("Don''t look behind you."));
             case 9 -> inventoryShuffle(player);
+            case 10 -> { if (p.fakeChatCooldown==0) fakeChatMessage(player,p); else whisper(player, glitchText("The chat lies...")); }
+            case 11 -> { if (p.fakeJoinCooldown==0) fakeJoinLeave(player,p); else playSound(player, ModSounds.DOOR_CREAK_EVENT, 1.0f, 0.8f); }
+            case 12 -> { if (p.ghostItemCooldown==0) inventoryGhostItem(player,p); else whisper(player, glitchText("Your items are mine")); }
+            case 13 -> { if (p.veinCorruptionCooldown==0) veinCorruptionSpread(player,p); else corruptNearby(player); }
+            case 14 -> { if (p.redstoneFlickerCooldown==0) redstoneFlicker(player,p); else fakeCaveSoundFar(player,p); }
+            case 15 -> { if (p.caveSoundCooldown==0) fakeCaveSoundFar(player,p); else whisper(player, glitchText("Do you hear them?")); }
         }
         p.fearLevel = Math.min(100, p.fearLevel + 3);
     }
@@ -176,6 +308,7 @@ public class SurveillanceAI {
     private void triggerAloneEvent(ServerPlayer player, PlayerProfile p) {
         whisper(player, glitchText("You shouldn''t be alone..."));
         playSound(player, SoundEvents.WARDEN_HEARTBEAT, 1.0f, 0.6f);
+        if (p.caveSoundCooldown==0) fakeCaveSoundFar(player,p);
     }
 
     private void handleStare(ServerPlayer player, PlayerProfile p) {
@@ -188,7 +321,6 @@ public class SurveillanceAI {
     }
 
     private void whisper(ServerPlayer player, String msg) {
-
         if (AiHorrorConfig.get().shaderGlitchEnabled && player.getRandom().nextFloat() < 0.4f) {
             player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 80, 0));
             player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 100, 0));
@@ -202,7 +334,6 @@ public class SurveillanceAI {
 
     private void playSound(ServerPlayer player, net.minecraft.sounds.SoundEvent event, float vol, float pitch) {
         ServerLevel lvl = (ServerLevel) player.level();
-
         float editedPitch = pitch * (0.8f + player.getRandom().nextFloat()*0.4f);
         lvl.playSound(null, player.blockPosition(), event, SoundSource.HOSTILE, vol, editedPitch);
     }
@@ -244,6 +375,7 @@ public class SurveillanceAI {
         BlockPos pos = player.blockPosition().offset(player.getRandom().nextInt(10)-5, 0, player.getRandom().nextInt(10)-5);
         lvl.playSound(null, pos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0f, 0.7f + player.getRandom().nextFloat()*0.5f);
         lvl.playSound(null, pos, SoundEvents.WOODEN_DOOR_CLOSE, SoundSource.BLOCKS, 1.0f, 0.7f);
+        if (player.getRandom().nextFloat()<0.5f) lvl.playSound(null, pos, ModSounds.DOOR_CREAK_EVENT, SoundSource.BLOCKS, 1.0f, 0.7f);
     }
 
     private void jumpscare(ServerPlayer player) {
@@ -268,7 +400,6 @@ public class SurveillanceAI {
 
     private void corruptNearby(ServerPlayer player) {
         if (!AiHorrorConfig.get().allowWorldCorruption) return;
-
         CorruptionManager.corruptAround(player, Math.min(6, AiHorrorConfig.get().maxCorruptionPerTick));
     }
 
@@ -359,7 +490,6 @@ public class SurveillanceAI {
         p.deathCount++;
         p.fearLevel = Math.min(100, p.fearLevel + 5);
         if (AiHorrorConfig.get().allowDeathCorruption) {
-
             CorruptionManager.corruptAround(player, 12);
             player.sendSystemMessage(Component.literal(glitchText("[AI] Your death feeds me... world corrupts")));
         } else {
@@ -368,8 +498,5 @@ public class SurveillanceAI {
     }
 
     public void setWorldSeed(long seed) { this.worldSeed = seed; this.seedRandom = new Random(seed); }
-
     public void removeProfile(UUID uuid) { profiles.remove(uuid); }
 }
-
-

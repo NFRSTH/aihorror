@@ -1,0 +1,15 @@
+{
+  "parent": "aihorror:watched",
+  "display": {
+    "icon": { "id": "minecraft:paper" },
+    "title": { "translate": "aihorror.advancement.found_footage.title" },
+    "description": { "translate": "aihorror.advancement.found_footage.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}

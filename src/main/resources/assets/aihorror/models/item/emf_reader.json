@@ -1,1 +1,6 @@
-{"parent":"minecraft:item/generated","textures":{"layer0":"aihorror:item/emf_reader"}}
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "aihorror:item/emf_reader"
+  }
+}

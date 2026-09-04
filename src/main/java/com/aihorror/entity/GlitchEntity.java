@@ -1,6 +1,5 @@
 package com.aihorror.entity;
 
-import com.aihorror.AiHorror;
 import com.aihorror.config.AiHorrorConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -8,8 +7,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -17,7 +14,6 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 
 public class GlitchEntity extends Monster {
     private int invisibleTicks = 0;
@@ -49,6 +45,8 @@ public class GlitchEntity extends Monster {
     }
 
     public void setInvisibleTicks(int t) { this.invisibleTicks = t; this.setInvisible(t > 0); }
+    public int getInvisibleTicks() { return invisibleTicks; }
+    public int getGlitchTicks() { return glitchTicks; }
     public void setTarget(ServerPlayer p) { super.setTarget(p); }
     public void setTargetPlayer(ServerPlayer p) { super.setTarget(p); }
 
@@ -57,8 +55,11 @@ public class GlitchEntity extends Monster {
         super.tick();
         lifeTicks++;
         glitchTicks++;
-
         if (!level().isClientSide()) {
+            if (AiHorrorConfig.get().isBanished()) {
+                discard();
+                return;
+            }
             if (invisibleTicks > 0) {
                 invisibleTicks--;
                 if (invisibleTicks == 0) {
@@ -148,15 +149,11 @@ public class GlitchEntity extends Monster {
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+    public boolean hurtServer(ServerLevel level, net.minecraft.world.damagesource.DamageSource source, float amount) {
         if (random.nextFloat() < 0.5f) {
             teleportNearTarget();
             return false;
         }
         return super.hurtServer(level, source, amount);
     }
-
-
 }
-
-

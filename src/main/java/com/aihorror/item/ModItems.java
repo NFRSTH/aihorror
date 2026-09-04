@@ -7,7 +7,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -49,6 +48,10 @@ public class ModItems {
                 player.sendSystemMessage(Component.literal("\u00A7c[AI] \u00A77Scanners disabled by config"));
                 return InteractionResult.FAIL;
             }
+            if (AiHorrorConfig.get().isBanished()) {
+                player.sendSystemMessage(Component.literal("\u00A7a[Scanner] \u00A77AI banished for " + (AiHorrorConfig.get().banishTicksRemaining/20) + "s - no signal"));
+                return InteractionResult.SUCCESS;
+            }
             var box = new AABB(player.blockPosition()).inflate(64);
             var entities = level.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, box);
             if (entities.isEmpty()) {
@@ -58,11 +61,13 @@ public class ModItems {
                 var e = entities.get(0);
                 double dist = player.distanceTo(e);
                 String threat = dist < 10 ? "\u00A7c\u00A7lCRITICAL" : dist < 30 ? "\u00A7eHIGH" : "\u00A76MEDIUM";
-                player.sendSystemMessage(Component.literal("\u00A7c[Scanner] \u00A77Signal: " + threat + " \u00A77(" + String.format("%.1f", dist) + "m) \u00A78Glitch at " + e.blockPosition().toShortString()));
-                level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), SoundSource.HOSTILE, 1.0f, 0.5f);
+                float beepPitch = dist < 10 ? 0.4f : dist < 30 ? 0.8f : 1.2f;
+                int beeps = dist < 10 ? 5 : dist < 30 ? 3 : 1;
+                player.sendSystemMessage(Component.literal("\u00A7c[Scanner] \u00A77Signal: " + threat + " \u00A77(" + String.format("%.1f", dist) + "m) \u00A78Glitch at " + e.blockPosition().toShortString() + " | Beep pitch " + beepPitch));
+                for (int i=0;i<beeps;i++) level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_DIDGERIDOO.value(), SoundSource.HOSTILE, 1.0f, beepPitch);
                 e.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.GLOWING, 200, 0));
             }
-            player.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(this), 40);
+            player.getCooldowns().addCooldown(new ItemStack(this), 40);
             return InteractionResult.SUCCESS;
         }
     }
@@ -73,6 +78,10 @@ public class ModItems {
         public InteractionResult use(Level level, Player player, InteractionHand hand) {
             if (level.isClientSide()) return InteractionResult.PASS;
             if (!AiHorrorConfig.get().counterItemsEnabled) return InteractionResult.FAIL;
+            if (AiHorrorConfig.get().isBanished()) {
+                player.sendSystemMessage(Component.literal("\u00A7a[EMF] \u00A77Banished - EMF 0"));
+                return InteractionResult.SUCCESS;
+            }
             int emf = 0;
             var pos = player.blockPosition();
             for (int dx=-8; dx<=8; dx++) for (int dy=-4; dy<=4; dy++) for (int dz=-8; dz<=8; dz++) {
@@ -92,12 +101,21 @@ public class ModItems {
             else if (emf > 4) { levelStr = "\u00A7e3 - MEDIUM"; pitch = 0.9f; }
             else if (emf > 1) { levelStr = "\u00A7a2 - LOW"; pitch = 1.2f; }
             else { levelStr = "\u00A771 - NONE"; pitch = 1.6f; }
-            player.sendSystemMessage(Component.literal("\u00A7b[EMF] \u00A77Reading: " + levelStr + " \u00A78(" + emf + ")"));
-            level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.PLAYERS, 1.0f, pitch);
+            var nearest = level.getEntitiesOfClass(com.aihorror.entity.GlitchEntity.class, new AABB(pos).inflate(64));
+            String distInfo = "";
+            if (!nearest.isEmpty()) {
+                double d = player.distanceTo(nearest.get(0));
+                distInfo = " | Nearest " + String.format("%.1f", d) + "m beep " + String.format("%.1f", pitch);
+                int beeps = d < 15 ? 4 : d < 30 ? 2 : 1;
+                for (int i=0;i<beeps;i++) level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.PLAYERS, 1.0f, pitch - i*0.1f);
+            } else {
+                level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_BIT.value(), SoundSource.PLAYERS, 1.0f, pitch);
+            }
+            player.sendSystemMessage(Component.literal("\u00A7b[EMF] \u00A77Reading: " + levelStr + " \u00A78(" + emf + ")" + distInfo));
             if (emf > 8) {
                 level.playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE.value(), SoundSource.HOSTILE, 0.8f, 0.5f);
             }
-            player.getCooldowns().addCooldown(new net.minecraft.world.item.ItemStack(this), 20);
+            player.getCooldowns().addCooldown(new ItemStack(this), 20);
             return InteractionResult.SUCCESS;
         }
     }

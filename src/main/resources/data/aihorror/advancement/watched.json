@@ -1,0 +1,15 @@
+{
+  "parent": "minecraft:adventure/root",
+  "display": {
+    "icon": { "id": "aihorror:scanner" },
+    "title": { "translate": "aihorror.advancement.watched.title" },
+    "description": { "translate": "aihorror.advancement.watched.description" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}
