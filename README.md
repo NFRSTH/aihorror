@@ -4,8 +4,9 @@
 
 [![Fabric 26.2](https://img.shields.io/badge/Minecraft-26.2-green)](https://fabricmc.net) [![Loader 0.19.3](https://img.shields.io/badge/Loader-0.19.3-blue)](https://fabricmc.net) [![Java 25](https://img.shields.io/badge/Java-25-orange)](https://adoptium.net) [![License MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
-**Mod jar:** `mods/aihorror-1.0.0.jar` (159KB, contains 3 user textures, valid Ogg Vorbis, working refmaps, fixed icon)  
-**Project: `.\AiHorror` (clone via `git clone https://github.com/NFRSTH/aihorror.git` -- do NOT nest)
+**Mod jar:** `mods/aihorror-1.3.0.jar` (165KB, 3 user textures, valid Ogg Vorbis, working refmaps, 32bpp block, WrittenBook guide)  
+**Project: `.\AiHorror` (clone via `git clone https://github.com/NFRSTH/aihorror.git` -- do NOT nest)**  
+**Version: 1.3.0** (Fabric 26.2 / Java 25) — `gradle.properties version=1.3.0` → `build/libs/aihorror-1.3.0.jar`
 
 ---
 
@@ -52,7 +53,7 @@
 - Cooldown `ItemStack` 40 / 20 ticks, `sendSystemMessage`
 
 ### 5. Block `src/main/java/com/aihorror/block/ModBlocks.java:1`
-- `corrupted_block` -- 16x16 purple/black checker + white cross `textures/block/corrupted_block.png:1` (127B valid PNG), `MapColor.COLOR_BLACK`, `2.0/6.0` `SOUL_SOIL` sound, light 2
+- `corrupted_block` -- 16x16 purple/black checker + white cross `textures/block/corrupted_block.png:1` (**825B 32bpp** valid PNG), `MapColor.COLOR_BLACK`, `2.0/6.0` `SOUL_SOIL` sound, light 2 — fixed from 127B
 
 ### 6. Sounds `src/main/resources/assets/aihorror/sounds.json:1` + `sounds/*.ogg:1`
 - `jumpscare.ogg` 17KB, `whisper.ogg` 20KB, `glitch_ambient.ogg` 18KB (3s stream), `static_loop.ogg` 25KB (2s loop) -- all valid OggS Vorbis `soundfile` 44.1kHz, not 10B header
@@ -83,7 +84,7 @@
 `setIntensity(0-5)` clamps, `save()` + reload verify logs `PERSISTENCE TEST PASSED`
 
 ### 9. Ritual Endgame `src/main/java/com/aihorror/world/RitualManager.java:1`
-- Needs `CORRUPTED_TAPE` in hand + midnight (`13000-19000`) + 4x `CRYING_OBSIDIAN` nearby -> weakens AI, spawns 20HP glitch to kill
+- Needs `CORRUPTED_TAPE` in hand + midnight (`13000-19000`) + **8x `CRYING_OBSIDIAN` + 4x `SOUL_SOIL`** in 5x5 ring -> weakens AI, spawns 20HP glitch to kill (fixed 1.3.0, was 4 obsidian)
 
 ---
 
@@ -109,7 +110,7 @@
 ## Installation
 
 1. Install **Fabric Loader 0.19.3** for **26.2** via TLauncher
-2. Put `fabric-api-0.158.0+26.2.jar` + `aihorror-1.0.0.jar` (159KB) in `%APPDATA%\.tlauncher\legacy\Minecraft\game\mods\`
+2. Put `fabric-api-0.158.0+26.2.jar` + `aihorror-1.3.0.jar` (165KB) in `%APPDATA%\.tlauncher\legacy\Minecraft\game\mods\`
 3. Requires **Java 25** (`jdk-25.0.4.1+1` at `C:\jdk25\`)
 4. Launch `Fabric 26.2` -> `creepy world` (already Creative + cheats: `level.dat GameType 1 allowCommands 1`, `players/data/... playerGameType 1`)
 
@@ -123,8 +124,8 @@ World `saves/creepy world` has `datapacks/aihorror/pack.mcmeta` marker + `AIHORR
 set JAVA_HOME=C:\jdk25\jdk-25.0.4+1  (or your JDK 25 install)
 cd .\AiHorror
 .\gradlew.bat build
-# -> build/libs/aihorror-1.0.0.jar (159KB) + aihorror-1.0.0-sources.jar
-copy build\libs\aihorror-1.0.0.jar "%appdata%\.tlauncher\legacy\Minecraft\game\mods\aihorror-1.0.0.jar"
+# -> build/libs/aihorror-1.3.0.jar (165KB) + aihorror-1.3.0-sources.jar
+copy build\libs\aihorror-1.3.0.jar "%appdata%\.tlauncher\legacy\Minecraft\game\mods\aihorror-1.3.0.jar"
 ```
 
 Mixins refmaps are generated via `src/*/resources/*.refmap.json` (manual minimal, loom also generates).
@@ -136,18 +137,18 @@ Mixins refmaps are generated via `src/*/resources/*.refmap.json` (manual minimal
 - **Icon** `assets/aihorror/icon.png:1` 128x128 PNG `89 50 4E 47` (was ZIP `PK`) -- dark bg purple stripes smiling face
 - **Entity** 3x 64x64 from `Downloads/glitch-*.png` (center-cropped Lanczos)
 - **Items** `scanner.png:175B` `emf_reader.png:170B` `corrupted_tape.png:135B` all 16x16 (were 76B 1x1)
-- **Block** `corrupted_block.png:127B` 16x16 purple/black (was 103B stub)
+- **Block** `corrupted_block.png:825B` 16x16 purple/black 32bpp (was 103B stub, 127B in 1.2.0)
 
 ---
 
 ## GitHub
 
 Source published to **https://github.com/NFRSTH/aihorror** (`master`):
-- `bb8bddf` perfect: mixins, icon, 0-5, gated, ritual, refmaps
-- `a8d3bda` chore ignore logs
-- `e6ad42c` 3 images entity
-- `0ffe56a` fix ogg/textures
+- `e082a13` 1.3.0: time jumps, spawnChance, ritual 8+4, WrittenBook, full ModMenu (15 buttons)
+- `72bf9c4` F3-F9: 32bpp block, en_us expansion, subtitles, recipes, disconnect leak fix, icon 128
+- `29e4b3d` 6 fixes: MIT, modid, paths, README, CI, ModMenu
+- `0ffe56a` valid Ogg Vorbis + real 16x16 items
 
-License MIT.
+License MIT. — Jar `aihorror-1.3.0.jar` (165KB) built `2026-09-04T14:31` on Java 25.
 
 
