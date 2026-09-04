@@ -3,6 +3,7 @@ package com.aihorror.util;
 import com.aihorror.ai.SurveillanceAI;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
 
 public class HorrorEvents {
@@ -27,6 +28,10 @@ public class HorrorEvents {
             if (entity instanceof ServerPlayer sp) {
                 SurveillanceAI.getInstance().handlePlayerDeath(sp);
             }
+        });
+        // F7: prevent memory leak - clean profile on disconnect
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            SurveillanceAI.getInstance().removeProfile(handler.getPlayer().getUUID());
         });
     }
 }

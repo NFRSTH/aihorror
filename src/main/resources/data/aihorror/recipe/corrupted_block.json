@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["OOO","OEO","OOO"],
+  "key": {
+    "O": { "item": "minecraft:obsidian" },
+    "E": { "item": "minecraft:echo_shard" }
+  },
+  "result": { "id": "aihorror:corrupted_block", "count": 4 }
+}

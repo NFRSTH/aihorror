@@ -354,4 +354,6 @@ public class SurveillanceAI {
     }
 
     public void setWorldSeed(long seed) { this.worldSeed = seed; this.seedRandom = new Random(seed); }
+
+    public void removeProfile(UUID uuid) { profiles.remove(uuid); }
 }
